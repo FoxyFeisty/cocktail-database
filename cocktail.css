@@ -1,0 +1,119 @@
+/*CSS INDEX
+
+1.	Allgemein
+2.	Klassen
+3.	IDs
+4.	Media Queries
+
+********************/
+
+
+
+/*******************
+/*1. Allgemein*/
+
+* {
+	box-sizing: border-box;
+}
+body {
+	font-family: 'Playfair Display', serif;
+	background: linear-gradient(to right, #ff6666, #ffb380);
+	margin: 0;
+}
+a {
+	text-decoration: none;
+}
+/*******************
+/*2. Klassen*/
+
+.kategorieHL {
+	font-weight: 600;
+	font-size: 1em;
+	margin-bottom: 0;
+}
+.navActive {
+	color: black !important;
+	background-color: white;
+}
+.mainHL {
+	font-size: 2em;
+	color: white;
+	margin-top: 0;
+}
+.subHL {
+	font-size: 1em;
+	text-decoration: underline;
+}
+
+/*******************
+/*3. IDs*/
+
+#topDiv {
+	color: white;
+	background-image: url("images/header_pic.jpg");
+	height: 200px;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+#pagetitle {
+	text-shadow: 0.5px 0.5px black;
+	font-size: 3em;
+	padding-top: 0.72em;
+	/*padding-bottom: 0.5em;*/
+	/*margin-left: 0.2em;*/
+}
+#nav1 ul {
+	background: black;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	width: 100%;
+}
+#nav1 li {
+	margin: 0 auto;
+	padding: 0.5em;
+}
+#nav1 a {
+	color: white;
+	padding: 0.5em;
+}
+#nav1 a:hover {
+	background-color: white;
+	color: black;
+}
+#contentDiv {
+	padding: 1em;
+}
+#rezeptDiv {
+	background: white;
+	padding: 0.3em;
+}
+#rezeptDiv > h1, p {
+	/*padding-left: 0.5em;*/
+}
+/*******************
+/*4. Media Queries*/
+
+@media only screen and (max-width: 490px) {
+	#pagetitle {
+		margin-top: 0;
+	}
+	#topDiv {
+		padding-left: 1em;
+		margin-bottom: 2em;
+		flex-direction: row;
+	}
+	#nav1 ul {
+		display: block;
+	}
+	#nav1 li {
+		padding: 0.3em;
+	}
+	#nav1 a {
+		padding: 0.3em;
+	}
+}

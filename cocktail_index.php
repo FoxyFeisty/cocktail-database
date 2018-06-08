@@ -1,10 +1,8 @@
 <?php
-
 # Einbindung der Datenbankverbindung
 include("cocktail_dbconn.php");
 # Einbindung von Zusatzfunktionen
 	# TBD 
-
 # IDs von Basisalkohol und Kategorie empfangen
 if (isset($_GET["basisId"])) {
 $basisId = $_GET["basisId"];
@@ -12,7 +10,6 @@ $basisId = $_GET["basisId"];
 // $katId = $_GET["katId"];
 // # ID von Suche empfangen
 // $suche = trim($_POST["suche"]);
-
 # Generierung des Seitentitels in <h1>
 if (isset($basisId)) {
 	$sql = "SELECT name FROM basis WHERE id=$basisId";
@@ -23,7 +20,6 @@ if (isset($basisId)) {
 // } else {
 // 	$seitentitel = "Das Cocktail-Lexikon";
 }
-
 ?>
 
 
@@ -42,7 +38,8 @@ if (isset($basisId)) {
 			<div id="topDiv">
 				<!-- Container für Seitentitel -->
 				<div>
-					<h1 id="pagetitle">Das Cocktail-Lexikon</h1>
+					<?php echo "<h1 id=\"pagetitle\"><a href=\"".$_SERVER["SCRIPT_NAME"].
+					"\">Das Cocktail-Lexikon</a></h1>"; ?>
 				</div>
 				<!-- Hauptmenü für Cocktail-Basisalkohol -->
 				<nav id="nav1">
@@ -57,20 +54,30 @@ $zeiger = mysqli_query($conn, $sql);
 echo "<ul>";
 while ($datensatz = mysqli_fetch_assoc($zeiger)) {
 	// Angeklickten Menüpunkt markieren 
-	if ($basisId == $datensatz["id"]) {
-		$linkclass = "class=\"navActive\"";
-	} else {
-		$linkclass = "";
-	}
+	// if ($basisId == $datensatz["id"]) {
+	// 	$linkclass = "class=\"navActive\"";
+	// } else {
+	// 	$linkclass = "";
+	// }
 	// Navigation
-	echo "<li>";
-	echo "<a $linkclass href=\"".$_SERVER["SCRIPT_NAME"]."?basisId=".$datensatz["id"]."\">".$datensatz["name"]."</a>";
-	echo "</li>\n";
+	if (isset($basisId)) {
+		if ($basisId == $datensatz["id"]) {
+			$linkclass = "class=\"navActive\"";
+		} else {
+			$linkclass = "";
+		}
+		echo "<li>";
+		echo "<a $linkclass href=\"".$_SERVER["SCRIPT_NAME"]."?basisId=".$datensatz["id"]."\">".$datensatz["name"]."</a>";
+		echo "</li>\n";
+	} else {
+		echo "<li>";
+		echo "<a href=\"".$_SERVER["SCRIPT_NAME"]."?basisId=".$datensatz["id"]."\">".$datensatz["name"]."</a>";
+		echo "</li>\n";
+	}
 }
 echo "</ul>";
 // Ergebnis wieder freigeben
 mysqli_free_result($zeiger);
-
 ?>
 				</nav>
 			</div>
@@ -86,94 +93,62 @@ mysqli_free_result($zeiger);
 				<!-- Content für Inhalt -->
 				<div id="contentDiv">
 
+
 <?php
 # Cocktail zu Basisalkohol anzeigen
-if (isset($basisId)) {
-	$c_array = array();
-	$sql = "SELECT * FROM cocktail WHERE basis_id = $basisId";
-	$zeiger = mysqli_query($conn, $sql);
-	while ($datensatz = mysqli_fetch_assoc($zeiger)) {
-		# Cocktail-Datensatz auslesen 
-		$cocktail["name"] = $datensatz["name"];
-		$cocktail["kategorie_id"] = $datensatz["kategorie_id"];
-		$cocktail["bild"] = $datensatz["bild"];
-		$cocktail["hintergrund"] = $datensatz["hintergrund"];
-		$cocktail["zutaten"] = $datensatz["zutaten_sammlung"];
-		$cocktail["zutaten"] = explode("/", $cocktail["zutaten"]);
-		for($i = 0; $i < count($cocktail["zutaten"]); $i += 1) {
-			$cocktail["zutaten"][$i] = explode(",", $cocktail["zutaten"][$i]);
-		}
-		$cocktail["rezept"] = $datensatz["rezept"];
-		$cocktail["geschmack_id"] = $datensatz["geschmack_id"];
-		# Cocktail-Datensatz in Gesamt-Array speichern
-		array_push($c_array, $cocktail);
-	}
-	for ($i = 0; $i < count($c_array); $i++) {
-		$c = $c_array[$i];
-		# Array mit Menge, einheit_id und zutaten_id
-		$zutaten = $c["zutaten"];
-		# Array für Zutaten
-		$z_array = array();
-		# Array für Einheiten
-		$e_array = array();
-		# Array für Menge
-		$m_array = array();
-		for ($j = 0; $j < count($zutaten); $j++) {
-			$menge = $zutaten[$j][0];
-			array_push($m_array, $menge);
-		}
-		# Namen der Zutaten aus Tabelle 'zutaten' auslesen
-		for ($j = 0; $j < count($zutaten); $j++) {
-			$zutatenId = intval($zutaten[$j][2]);
-			$sql = "SELECT name FROM zutaten WHERE id = $zutatenId";
-			$zeiger = mysqli_query($conn, $sql);
-			while ($datensatz = mysqli_fetch_assoc($zeiger)) {
-				$zutatenName = $datensatz["name"];
-				array_push($z_array, $zutatenName);
-			}
-		}
-		# Einheiten aus Tabelle 'einheiten' auslesen
-		for ($j = 0; $j < count($zutaten); $j++) {
-			$einheitenId = intval($zutaten[$j][1]);
-			$sql = "SELECT name FROM einheiten WHERE id = $einheitenId";
-			$zeiger = mysqli_query($conn, $sql);
-			while ($datensatz = mysqli_fetch_assoc($zeiger)) {
-				$einheit = $datensatz["name"];
-				array_push($e_array, $einheit);
-			}
-		}
-		# Kategorie aus Tabelle 'kategorie' auslesen
-		$katId = $c["kategorie_id"];
-		$sql = "SELECT name FROM kategorie WHERE id = $katId";
-		$zeiger = mysqli_query($conn, $sql);
-		while ($datensatz = mysqli_fetch_assoc($zeiger)) {
-			$kategorie = $datensatz["name"];
-		}
-		# Geschmack aus Tabelle 'geschmack' auslesen
-		$gId = $c["geschmack_id"];
-		$sql = "SELECT name FROM geschmack WHERE id = $gId";
-		$zeiger = mysqli_query($conn, $sql);
-		while ($datensatz = mysqli_fetch_assoc($zeiger)) {
-			$geschmack = $datensatz["name"];
-		}
-		// echo "<h4>" . $seitentitel . "</h4>"; 
-		echo "<h1 class=\"kategorieHL\">Kategorie: " . $kategorie . "</h4>"; 
-		echo "<div class=\"introDiv\">" . $cocktail["bild"];
-		echo "<h1 class=\"mainHL\">" . $cocktail["name"] . "</h1>";
-		echo "<h1 class=\"subHL\">" . "Hintergrund: </h2>";
-		echo "<p>" . $cocktail["hintergrund"] . "</p></div>";
-		echo "<div id=\"rezeptDiv\"><h1 class=\"subHL\">" . "Zutaten: </h2><ul>";
-		for ($j = 0; $j < count($e_array); $j++) {
-			$str = $m_array[$j] . " " . $e_array[$j] . " " . $z_array[$j];
-			echo "<li>" . $str . "</li>";
-		}
-		echo "</ul>";
-		echo "<h1 class=\"subHL\">" . "Rezept: </h2>";
-		echo "<p>" . $cocktail["rezept"] . "</p>";
-		echo "<p>Geschmack: " . $geschmack . "</p></div>";
-	}
+if (!isset($basisId)) {
+	echo "<h1 class=\"mainHL\">\"I only take a drink on two occasions:</br> when I’m thirsty and when I’m not.\"</h1>";
+	echo "<div id=\"rezeptDiv\"><p>Ob geschüttelt oder gerührt, ob on the rocks oder mit Schirmchen – die Welt der Cocktails ist so vielseitig wie faszinierend. Und wie der irische Dichter Brendan Behan richtig bemerkte: für einen guten Drink gibt es immer einen guten Grund!</br>Auf dieser Seite finden Sie nicht nur das passende Rezept, sondern auch spannende Hintergrundinfos.</br></br>Viel Vergnügen!</p></div>";
 }
+if (isset($basisId)) {
+		# SQL Abfrage für Name, Bild, Hintergrund, Kategorie und Basis
+		$sql = "SELECT c.id, c.name, c.bild, c.hintergrund, b.name basis, k.name kategorie ".
+			"FROM cocktail c " .
+			"INNER JOIN kategorie k ON k.id = c.kategorie_id ".
+			"INNER JOIN basis b ON b.id = c.basis_id ".
+			"WHERE basis_id = $basisId ";
 
+		$zeiger = mysqli_query($conn,$sql);
+
+		while ($datensatz = mysqli_fetch_assoc($zeiger)) {
+			echo "<h1 class=\"kategorieHL\">Kategorie: " . $datensatz["kategorie"] . "</h1>"; 
+			echo "<div class=\"introDiv\">" . $datensatz["bild"];
+			echo "<h1 class=\"mainHL\">" . $datensatz["name"] . "</h1>";
+			echo "<h1 class=\"subHL\">" . "Hintergrund: </h1>";
+			echo "<p>" . $datensatz["hintergrund"] . "</p></div>";
+			echo "<div id=\"rezeptDiv\"><h1 class=\"subHL\">" . "Zutaten: </h1><ul>";
+		}
+		# SQL Abfrage für Rezept
+		$sql = "SELECT c.id, c.name, c.bild, c.hintergrund, c.rezept, b.name basis, k.name kategorie, r.einheit_id, r.menge, r.zutat_id, e.name einheit, z.name zutat ".
+			"FROM cocktail c " .
+			"INNER JOIN kategorie k ON k.id = c.kategorie_id ".
+			"INNER JOIN basis b ON b.id = c.basis_id ".
+			// "INNER JOIN geschmack g ON g.id = c.geschmack_id ".
+			"RIGHT JOIN rezepte r ON r.cocktail_id = c.id ".
+			"INNER JOIN einheiten e ON e.id = r.einheit_id ".
+			"INNER JOIN zutaten z ON z.id = r.zutat_id ".
+			"WHERE basis_id = $basisId ";
+
+		$zeiger = mysqli_query($conn,$sql);
+
+		while ($datensatz = mysqli_fetch_assoc($zeiger)) {
+			echo "<li>" . $datensatz["menge"] . " " . $datensatz["einheit"] . " " . $datensatz["zutat"] . "</li>";
+		}
+		# SQL Abfrage für Rezeptbeschreibung und Geschmack
+		$sql = "SELECT c.id, c.rezept, g.name geschmack ".
+			"FROM cocktail c " .
+			"INNER JOIN geschmack g ON g.id = c.geschmack_id ".
+			"WHERE basis_id = $basisId ";
+
+		$zeiger = mysqli_query($conn,$sql);
+
+		while ($datensatz = mysqli_fetch_assoc($zeiger)) {
+			echo "</ul><h1 class=\"subHL\">" . "Rezept: </h1>";
+			echo "<p>" . $datensatz["rezept"] . "</p>";
+			echo "<p>Geschmack: " . $datensatz["geschmack"] . "</p></div>";
+		}
+}
+				
 ?>
 				</div>
 			</div>

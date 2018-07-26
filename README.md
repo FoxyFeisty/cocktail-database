@@ -1,4 +1,4 @@
-# cocktail-project
+# cocktail-database 
 
 Fictional cocktail webpage as practise project using Javascript, PHP and SQL. Focus on developing a relational database as well as an user back-end.
 
